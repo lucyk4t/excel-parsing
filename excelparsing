@@ -1,0 +1,46 @@
+import pandas as pd
+import re
+import random as r
+
+df = pd.read_excel("SignalList.xlsx", "SignalList") 
+vas = df.values
+
+# 신규 arxml 파일 적용
+sigreg = re.compile(r'^\w+')  # 정상 동작 확인
+msgreg = re.compile(r'(\"\w+\")\t(\"\w+\")') # 정상 동작 확인
+
+siglist = []
+msglist = []
+
+
+def sigmsgread():
+# Excel 파일 읽어들인 후 정규표현식대로 적용된 Case
+    try:
+        for i in vas:
+            for j in i:
+                sigstr = re.search(sigreg, j) # Signal 이름 검색
+                msgstr = re.search(msgreg, j) # Msg 이름 검색
+
+                if sigstr:
+                    sigmod = sigstr.group()
+                if msgstr:
+                    msgmod = msgstr.group(2).strip(r'\"')
+
+                if sigstr not in ["ClstrDspAnmReq", "IntDimLvl", "IntDimDspLvl", "SPMP_SysPwrModeAuth", "SPMP_SysPwrModeInv"]:
+                    siglist.append(sigmod)
+                    msglist.append(msgmod)
+                else:
+                    print("Signal Name is in list")
+                    sigmsgread()
+
+        ransig = r.randint(0, len(siglist))
+        ranmsg = r.randint(0, len(msglist))
+
+        # 랜덤 메시지 확인용, 아래 인덱스를 가지고 SendCANSignal(siglist[ransig], data) 형태로 신호 전송해준 후 현물 확인 필요
+        print(siglist[ransig], msglist[ranmsg])
+
+    except AttributeError as e:
+        print(e)
+
+
+sigmsgread()
