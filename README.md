@@ -1,0 +1,2 @@
+# mymodule
+My own module
